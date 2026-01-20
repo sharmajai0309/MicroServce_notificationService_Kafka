@@ -2,6 +2,8 @@ package com.notification.api.controller;
 
 import com.notification.api.models.request.CreateTemplateRequest;
 import com.notification.api.models.request.TemplateFilterRequest;
+import com.notification.api.models.request.UpdateTemplateRequest;
+import com.notification.api.models.response.DeleteResponse;
 import com.notification.api.models.response.FilterTemplateResponse;
 import com.notification.api.models.response.TemplateResponse;
 import com.notification.api.services.interfaces.TemplateService;
@@ -39,5 +41,21 @@ public class TemplateController {
         FilterTemplateResponse filterTemplateResponse = templateService.filterTemplate(request);
         return ResponseEntity.status(HttpStatus.OK).body(filterTemplateResponse);
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<TemplateResponse>updateTemplate(@PathVariable String id,@RequestBody UpdateTemplateRequest request){
+        log.info("In update controller Level");
+       return ResponseEntity.ok(templateService.updateTemplate(id, request));
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<DeleteResponse>deleteTemplate(@PathVariable String id){
+        return ResponseEntity.status(HttpStatus.OK).body(templateService.deleteTemplate(id));
+    }
+
+
+
+
 
 }

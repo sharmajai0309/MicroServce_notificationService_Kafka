@@ -4,6 +4,7 @@ import com.notification.api.dao.interfaces.TemplateDao;
 import com.notification.api.dao.repositories.TemplateRepository;
 import com.notification.api.models.entity.Template;
 import com.notification.api.models.request.TemplateFilterRequest;
+import com.notification.api.models.response.DeleteResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -20,6 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.notification.api.utils.CommanUtils.getCurrentTenantId;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,15 +35,21 @@ class TemplateDaoImpl implements TemplateDao {
 
     @Override
     public Optional<Template> findByTenantIdAndName(final String tenantId, final String name) {
-
         return templateRepository.findByNameIgnoreCaseAndTenantId(name, UUID.fromString(tenantId));
-
-
-
     }
+
+
+    @Override
+    public Optional<Template> findByTenantIdAndId(final String tenantId, final String id) {
+        return templateRepository.findByTenantIdAndId(UUID.fromString(tenantId),
+                UUID.fromString(id));
+    }
+
+
 
     @Override
     public Template save(final Template template) {
+        log.info("In Dao Level");
         return templateRepository.save(template);
     }
 
@@ -88,6 +97,26 @@ class TemplateDaoImpl implements TemplateDao {
                 mongoTemplate.find(query, Template.class);
         return new PageImpl<>(data, pageable, total);
 
+    }
+
+    /**
+     * @param id
+     * @return
+     */
+    @Override
+    public DeleteResponse deleteTemplateById(final String id) {
+        Optional<Template> byTenantIdAndId = findByTenantIdAndId(
+                getCurrentTenantId(),
+                id
+        );
+        DeleteResponse deleteResponse = new DeleteResponse();
+        if (byTenantIdAndId.isEmpty()) {
+            deleteResponse.setMessage("Template with id " + id + " not found");
+        } else {
+            templateRepository.deleteById(UUID.fromString(id));
+            deleteResponse.setMessage("Template with id " + id + " deleted");
+        }
+        return deleteResponse;
     }
 
 
