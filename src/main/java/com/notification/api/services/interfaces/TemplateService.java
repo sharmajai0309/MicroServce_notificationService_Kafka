@@ -12,11 +12,40 @@ import jakarta.validation.Valid;
 public interface TemplateService {
 
 
+    /**
+     * create template
+     *
+     * @param request request
+     * @return {@link TemplateResponse}
+     * @see TemplateResponse
+     */
     TemplateResponse createTemplate(CreateTemplateRequest request);
 
+    /**
+     * filter template
+     *
+     * @param request request
+     * @return {@link FilterTemplateResponse}
+     * @see FilterTemplateResponse
+     */
     FilterTemplateResponse filterTemplate(TemplateFilterRequest request);
 
+    /**
+     * update template
+     *
+     * @param id id
+     * @param request request
+     * @return {@link TemplateResponse}
+     * @see TemplateResponse
+     */
     TemplateResponse updateTemplate(String id,UpdateTemplateRequest request);
 
+    /**
+     * delete template
+     *
+     * @param id id
+     * @return {@link DeleteResponse}
+     * @see DeleteResponse
+     */
     DeleteResponse deleteTemplate(String id);
 }

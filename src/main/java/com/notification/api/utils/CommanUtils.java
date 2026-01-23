@@ -2,10 +2,13 @@ package com.notification.api.utils;
 
 import com.notification.api.models.context.NotificationContext;
 import com.notification.api.models.context.NotificationContextHolder;
+import org.slf4j.MDC;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Calendar;
 import java.util.UUID;
+
+import static com.notification.api.constants.ApplicationConstants.X_REQUEST_ID;
 
 /**
  * The type Comman utils.
@@ -64,6 +67,15 @@ public final class CommanUtils {
        return NotificationContextHolder.getContext().tenantId();
     }
 
+    /**
+     * get current trance i d
+     *
+     * @return {@link String}
+     * @see String
+     */
+    public static String getCurrentTranceID(){
+        return MDC.get(X_REQUEST_ID);
+    }
 
 
 }

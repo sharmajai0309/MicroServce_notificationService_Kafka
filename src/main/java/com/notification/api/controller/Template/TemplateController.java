@@ -1,4 +1,4 @@
-package com.notification.api.controller;
+package com.notification.api.controller.Template;
 
 import com.notification.api.models.request.CreateTemplateRequest;
 import com.notification.api.models.request.TemplateFilterRequest;
@@ -22,9 +22,21 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor
 public class TemplateController {
 
+    /**
+     * template service
+     *
+     */
     private final TemplateService templateService;
 
 
+    /**
+     * create template
+     *
+     * @param request request
+     * @return {@link ResponseEntity}
+     * @see ResponseEntity
+     * @see TemplateResponse
+     */
     @PostMapping
     public ResponseEntity<TemplateResponse> createTemplate(@Valid @RequestBody CreateTemplateRequest request) {
         TemplateResponse templateResponse = templateService.createTemplate(request);
@@ -36,12 +48,29 @@ public class TemplateController {
 
 
 
+    /**
+     * filter template
+     *
+     * @param request request
+     * @return {@link ResponseEntity}
+     * @see ResponseEntity
+     * @see FilterTemplateResponse
+     */
     @PostMapping("/filter")
     public ResponseEntity<FilterTemplateResponse> filterTemplate(@RequestBody TemplateFilterRequest request) {
         FilterTemplateResponse filterTemplateResponse = templateService.filterTemplate(request);
         return ResponseEntity.status(HttpStatus.OK).body(filterTemplateResponse);
     }
 
+    /**
+     * update template
+     *
+     * @param id id
+     * @param request request
+     * @return {@link ResponseEntity}
+     * @see ResponseEntity
+     * @see TemplateResponse
+     */
     @PatchMapping("/{id}")
     public ResponseEntity<TemplateResponse>updateTemplate(@PathVariable String id,@RequestBody UpdateTemplateRequest request){
         log.info("In update controller Level");
@@ -49,6 +78,14 @@ public class TemplateController {
     }
 
 
+    /**
+     * delete template
+     *
+     * @param id id
+     * @return {@link ResponseEntity}
+     * @see ResponseEntity
+     * @see DeleteResponse
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<DeleteResponse>deleteTemplate(@PathVariable String id){
         return ResponseEntity.status(HttpStatus.OK).body(templateService.deleteTemplate(id));

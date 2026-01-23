@@ -7,12 +7,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.notification.api.constants.ApplicationConstants.X_REQUEST_ID;
 import static com.notification.api.constants.ApplicationConstants.X_TENANT_ID;
 /*
 This OncePerRequestFilter validates tenant headers for API requests,
@@ -31,7 +33,10 @@ public class NotificationAuthFilter extends OncePerRequestFilter {
             if (CommanUtils.isEmpty(xTenantId)) {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.getWriter().write("Unauthorized API Key !!!! Key is Required");
-                return;
+                String requestid = String.valueOf(CommanUtils.generateUUID());
+                MDC.put(X_REQUEST_ID, requestid);
+                response.setHeader(X_REQUEST_ID, requestid);
+
             }
             NotificationContextHolder.setContext(new NotificationContext(xTenantId));
         }

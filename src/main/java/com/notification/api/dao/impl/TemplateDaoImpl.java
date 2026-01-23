@@ -23,6 +23,10 @@ import java.util.UUID;
 
 import static com.notification.api.utils.CommanUtils.getCurrentTenantId;
 
+/**
+ *  template dao impl
+ *
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +37,15 @@ class TemplateDaoImpl implements TemplateDao {
      private final MongoTemplate  mongoTemplate;
 
 
+    /**
+     * find by tenant id and name
+     *
+     * @param tenantId tenantId
+     * @param name name
+     * @return {@link Optional}
+     * @see Optional
+     * @see Template
+     */
     @Override
     public Optional<Template> findByTenantIdAndName(final String tenantId, final String name) {
         return templateRepository.findByNameIgnoreCaseAndTenantId(name, UUID.fromString(tenantId));

@@ -13,6 +13,13 @@ import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 
+/**
+ *   mongo config
+ *
+ */ /**
+ *  mongo config
+ *
+ */
 @Configuration
 public class MongoConfig {
 
