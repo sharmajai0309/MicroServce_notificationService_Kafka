@@ -17,7 +17,7 @@ public class MqttProviderImpl implements MqttProvider {
      * @return
      */
     @Override
-    public boolean sendBoolean(String TopicName, String message) {
+    public boolean sendNotification(String TopicName, String message) {
         log.info("Sending Notification message to RabbitMq Topic: {}", TopicName);
         return true;
     }

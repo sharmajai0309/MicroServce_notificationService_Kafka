@@ -22,7 +22,7 @@ public class KafkaProviderImpl implements KafkaProvider {
 
 
     @Override
-    public boolean sendBoolean(String topicName, String message) {
+    public boolean sendNotification(String topicName, String message) {
         log.info("In Service Impl layer");
 
         log.info("Sending received params for validations");

@@ -2,5 +2,5 @@ package com.notification.api.PubSub.publisher;
 
 public interface GenericPublisher {
 
-    void sendNotification();
+    void sendNotification(final String topic , final String message);
 }
