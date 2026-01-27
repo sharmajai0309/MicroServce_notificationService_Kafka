@@ -1,5 +1,7 @@
 package com.notification.api.services.impl;
 
+import com.notification.api.PubSub.fallBack.GenericFallBackPublisher;
+import com.notification.api.PubSub.publisher.GenericPublisher;
 import com.notification.api.dao.interfaces.TemplateDao;
 import com.notification.api.exception.ValidationException;
 import com.notification.api.models.entity.Template;
@@ -24,6 +26,8 @@ import static com.notification.api.constants.ErrorConstants.Template_Not_Exists_
 public class NotificationServiceImpl implements NotificationService {
 
     private final TemplateDao templateDao;
+    private final GenericPublisher genericPublisher;
+
 
     /**
      * @param request
@@ -34,10 +38,10 @@ public class NotificationServiceImpl implements NotificationService {
         Optional<Template> byTenantIdAndId = templateDao.findByTenantIdAndId(CommanUtils.getCurrentTenantId(), request.getTemplateId());
 
         if(byTenantIdAndId.isEmpty()){
-
             log.error("Template not found Sending to Audit Topic");
 
             // Validation Failed.... Publish Data to Audit_Topic
+//            genericPublisher.sendDataToAudit();
 
             throw new ValidationException(Template_Not_Exists_with_Id_Error, HttpStatus.BAD_REQUEST.value());
         }
@@ -50,5 +54,10 @@ public class NotificationServiceImpl implements NotificationService {
         ingestTopicDTO.setTenantId(request.getTemplateId());
         ingestTopicDTO.setNotificationType(request.getNotificationType());
         ingestTopicDTO.setDynamicVariables(request.getDynamicVariables());
+
+
+        genericPublisher.sendDataToIngest(ingestTopicDTO);
+
+
     }
 }

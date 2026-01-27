@@ -1,14 +1,19 @@
 package com.notification.api.PubSub.publisher;
 
-
 import com.notification.api.PubSub.Primary.GenericProvider;
 import com.notification.api.PubSub.fallBack.GenericFallBackPublisher;
+import com.notification.api.config.ApplicationProperties;
+import com.notification.api.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+
+
 
 @Slf4j
 @Service
@@ -16,10 +21,34 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class GenericPublisherImpl implements GenericPublisher {
 
     private List<GenericProvider> genericPublishers;
-
     private List<GenericFallBackPublisher> fallBackPublishers;
+    private ObjectMapper mapper;
+    private ApplicationProperties applicationProperties;
+
+    /**
+     * send data to ingest
+     *
+     * @param input input
+     */
+    @Override
+    public void sendDataToIngest(final Object input){
+        String convertedInput = convertDataIntoString(input);
+        sendNotification(applicationProperties.getIngestTopic(), convertedInput);
+    }
+
+    @Override
+    public void sendDataToAudit(final Object input){
+        String convertedInput = convertDataIntoString(input);
+        sendNotification(applicationProperties.getAuditTopic(), convertedInput);
+    }
 
 
+    /**
+     * send notification
+     *
+     * @param topic topic
+     * @param message message
+     */
     @Override
     public void sendNotification(final String topic, final String message) {
 
@@ -63,6 +92,29 @@ public class GenericPublisherImpl implements GenericPublisher {
             });
         }
     }
+
+
+
+    /**
+     * convert data into string
+     *
+     * @param input input
+     * @return {@link String}
+     * @see String
+     */
+    private String convertDataIntoString(final Object input) {
+        try {
+            return mapper.writeValueAsString(input);
+        } catch (Exception e) {
+            throw new ValidationException(
+                    "Error while converting object to json string",
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+    }
+
+
+
 
 
 }
