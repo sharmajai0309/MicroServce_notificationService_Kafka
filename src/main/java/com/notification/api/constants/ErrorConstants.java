@@ -7,4 +7,5 @@ public interface ErrorConstants {
 
     String TEMPLATE_ID_IS_REQUIRED = "Template ID Is Required";
     String PUT_CACHING_ERROR = "Error While Caching the data";
+    String CACHE_PARSING_ERROR = "Error While Parsing the data";
 }
