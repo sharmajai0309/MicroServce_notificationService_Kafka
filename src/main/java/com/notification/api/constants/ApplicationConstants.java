@@ -8,4 +8,9 @@ public interface ApplicationConstants {
 
     String X_REQUEST_ID = "x-request-id";
 
+    String TEMPLATE_REDIS_PREFIX = "template.";
+
+    String REDIS_LOOKUP_BY_NAME = "BY_NAME:";
+    String REDIS_LOOKUP_BY_ID = "BY_ID:";
+
 }

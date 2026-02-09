@@ -1,5 +1,6 @@
 package com.notification.api.PubSub.publisher;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.notification.api.PubSub.Primary.GenericProvider;
 import com.notification.api.PubSub.fallBack.GenericFallBackPublisher;
 import com.notification.api.config.ApplicationProperties;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -92,7 +92,6 @@ public class GenericPublisherImpl implements GenericPublisher {
             });
         }
     }
-
 
 
     /**

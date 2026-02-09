@@ -55,7 +55,6 @@ public class NotificationServiceImpl implements NotificationService {
         ingestTopicDTO.setNotificationType(request.getNotificationType());
         ingestTopicDTO.setDynamicVariables(request.getDynamicVariables());
 
-
         genericPublisher.sendDataToIngest(ingestTopicDTO);
 
 
