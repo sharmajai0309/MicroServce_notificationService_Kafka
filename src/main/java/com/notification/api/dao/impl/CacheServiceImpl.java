@@ -21,6 +21,7 @@ public class CacheServiceImpl implements CacheService {
     private final RedisTemplate<String,String> redisTemplate;
     private final ObjectMapper objectMapper;
 
+
     /**
      * get tenant cache key
      *
@@ -28,7 +29,8 @@ public class CacheServiceImpl implements CacheService {
      * @return {@link String}
      * @see String
      */
-    private String getTenantCacheKey(final String tenantID){
+    @Override
+    public String getTenantCacheKey(final String tenantID){
         return TEMPLATE_REDIS_PREFIX.concat(tenantID);
     }
 
@@ -39,7 +41,8 @@ public class CacheServiceImpl implements CacheService {
      * @param id id
      * @param data data
      */
-    public <T> void putBYid (final String tenantId ,final String id,T data){
+    @Override
+    public <T> void putBYid(final String tenantId, final String id, T data){
       put(tenantId,REDIS_LOOKUP_BY_ID.concat(id),data);
     }
 
@@ -50,7 +53,8 @@ public class CacheServiceImpl implements CacheService {
      * @param name name
      * @param data data
      */
-    public <T> void putByName(final String tenantId,final String name ,T data){
+    @Override
+    public <T> void putByName(final String tenantId, final String name, T data){
       put(tenantId,REDIS_LOOKUP_BY_NAME.concat(name),data);
   }
 
@@ -60,7 +64,8 @@ public class CacheServiceImpl implements CacheService {
      * @param tenantID tenantID
      * @param id id
      */
-    public void deleteById(final String tenantID,final String id){
+    @Override
+    public void deleteById(final String tenantID, final String id){
         delete(tenantID,REDIS_LOOKUP_BY_ID.concat(id));
     }
 
@@ -70,7 +75,8 @@ public class CacheServiceImpl implements CacheService {
      * @param tenantID tenantID
      * @param name name
      */
-    public void deleteByName(final String tenantID,final String name){
+    @Override
+    public void deleteByName(final String tenantID, final String name){
         delete(tenantID,REDIS_LOOKUP_BY_NAME.concat(name));
     }
 
@@ -81,7 +87,8 @@ public class CacheServiceImpl implements CacheService {
      * @param hashKey hashKey
      * @param data data
      */ //Generic function
-    private <T> void put(final String tenantId,final String hashKey,T data){
+    @Override
+    public <T> void put(final String tenantId, final String hashKey, T data){
 //      put(redisKey, field, value)
 
       /*
@@ -106,12 +113,13 @@ public class CacheServiceImpl implements CacheService {
      * @param tenantId tenantId
      * @param hashKey hashKey
      */
-    private <T> void delete(final String tenantId,final String hashKey){
+    @Override
+    public <T> void delete(final String tenantId, final String hashKey){
       redisTemplate.opsForHash().delete(getTenantCacheKey(tenantId),hashKey);
     }
 
     /**
-     * get by i d
+     * get by id
      *
      * @param tenantId tenantId
      * @param id id
@@ -120,7 +128,8 @@ public class CacheServiceImpl implements CacheService {
      * @see Optional
      * @see T
      */
-    public <T> Optional<T> getByID(final String tenantId , final String id, Class<T> clazz){
+    @Override
+    public <T> Optional<T> getByID(final String tenantId, final String id, Class<T> clazz){
 
         return get(tenantId,REDIS_LOOKUP_BY_ID.concat(id),clazz);
     }
@@ -134,7 +143,8 @@ public class CacheServiceImpl implements CacheService {
      * @see Optional
      * @see T
      */
-    public <T> Optional<T> getByName(final String tenantId , final String name, Class<T> clazz){
+    @Override
+    public <T> Optional<T> getByName(final String tenantId, final String name, Class<T> clazz){
 
         return get(tenantId,REDIS_LOOKUP_BY_NAME.concat(name),clazz);
     }
@@ -149,7 +159,8 @@ public class CacheServiceImpl implements CacheService {
      * @see Optional
      * @see T
      */
-    private <T> Optional<T> get(final String tenantId, final String hashKey, Class<T> clazz){
+    @Override
+    public <T> Optional<T> get(final String tenantId, final String hashKey, Class<T> clazz){
 
         HashOperations<String,String,String> ops = redisTemplate.opsForHash();
         String jsondata = ops.get(getTenantCacheKey(tenantId), hashKey);

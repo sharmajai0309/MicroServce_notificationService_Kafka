@@ -1,5 +1,6 @@
 package com.notification.api.dao.impl;
 
+import com.notification.api.dao.interfaces.CacheService;
 import com.notification.api.dao.interfaces.TemplateDao;
 import com.notification.api.dao.repositories.TemplateRepository;
 import com.notification.api.models.entity.Template;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.notification.api.constants.ApplicationConstants.TEMPLATE_DELETED;
+import static com.notification.api.constants.ApplicationConstants.TEMPLATE_NOT_FOUND_BY_ID;
 import static com.notification.api.utils.CommanUtils.getCurrentTenantId;
 
 /**
@@ -35,6 +38,7 @@ class TemplateDaoImpl implements TemplateDao {
      private final TemplateRepository templateRepository;
 
      private final MongoTemplate  mongoTemplate;
+     private final CacheService cacheService;
 
 
     /**
@@ -47,23 +51,82 @@ class TemplateDaoImpl implements TemplateDao {
      * @see Template
      */
     @Override
-    public Optional<Template> findByTenantIdAndName(final String tenantId, final String name) {
-        return templateRepository.findByNameIgnoreCaseAndTenantId(name, UUID.fromString(tenantId));
+    public Optional<Template> findByTenantIdAndName(final String tenantId, final String templateName) {
+
+        Optional<Template> cachedTemplate = cacheService.getByName(tenantId, templateName, Template.class);
+        if(cachedTemplate.isPresent()) {
+            return cachedTemplate;
+        }
+        Optional<Template> dbTemplate = templateRepository.findByNameIgnoreCaseAndTenantId(templateName, UUID.fromString(tenantId));
+        if(dbTemplate.isPresent()){
+            Template template = dbTemplate.get();
+            cacheService.putByName(tenantId,templateName,template);
+        }
+        return dbTemplate;
+
+//        Functional Style
+//        return cacheService.getByName(tenantId, templateName, Template.class)
+//                .or(() ->
+//                        templateRepository
+//                                .findByNameIgnoreCaseAndTenantId(
+//                                        templateName,
+//                                        UUID.fromString(tenantId)
+//                                )
+//                                .map(template -> {
+//                                    cacheService.putByName(tenantId, templateName, template);
+//                                    return template;
+//                                })
+//                );
+
+
+
     }
 
 
+    /**
+     * find by tenant id and id
+     *
+     * @param tenantId tenantId
+     * @param id id
+     * @return {@link Optional}
+     * @see Optional
+     * @see Template
+     */
     @Override
     public Optional<Template> findByTenantIdAndId(final String tenantId, final String id) {
-        return templateRepository.findByTenantIdAndId(UUID.fromString(tenantId),
-                UUID.fromString(id));
+        return cacheService.getByID(tenantId, id, Template.class).or(() ->
+                templateRepository.findByTenantIdAndId(UUID.fromString(tenantId), UUID.fromString(id))
+                        .map(template -> {
+                            cacheService.putBYid(tenantId,id,template);
+                            return template;
+                        })
+        );
     }
 
 
 
+    /**
+     * save
+     *
+     * @param template template
+     * @return {@link Template}
+     * @see Template
+     */
     @Override
     public Template save(final Template template) {
         log.info("In Dao Level");
-        return templateRepository.save(template);
+        Template saved = templateRepository.save(template);
+        cacheService.putByName(
+                getCurrentTenantId(),
+                saved.getName(),
+                saved
+        );
+        cacheService.putBYid(
+                getCurrentTenantId(),
+                saved.getId().toString(),
+                saved
+        );
+        return saved;
     }
 
     /**
@@ -118,16 +181,32 @@ class TemplateDaoImpl implements TemplateDao {
      */
     @Override
     public DeleteResponse deleteTemplateById(final String id) {
+        String tenantId = getCurrentTenantId();
+
         Optional<Template> byTenantIdAndId = findByTenantIdAndId(
-                getCurrentTenantId(),
+                tenantId,
                 id
         );
         DeleteResponse deleteResponse = new DeleteResponse();
         if (byTenantIdAndId.isEmpty()) {
-            deleteResponse.setMessage("Template with id " + id + " not found");
+            deleteResponse.setMessage(TEMPLATE_NOT_FOUND_BY_ID + id);
         } else {
+            Template template = byTenantIdAndId.get();
+            /*
+            clearing Database
+             */
             templateRepository.deleteById(UUID.fromString(id));
-            deleteResponse.setMessage("Template with id " + id + " deleted");
+            deleteResponse.setMessage(TEMPLATE_DELETED + id);
+            /*
+            clearing cache
+            1.By name
+            2.By Id
+             */
+            cacheService.deleteByName(tenantId, template.getName());
+            cacheService.deleteById(tenantId,id);
+            deleteResponse.setMessage(
+                    "Template with id " + id + " deleted and cache data is also cleared"
+            );
         }
         return deleteResponse;
     }

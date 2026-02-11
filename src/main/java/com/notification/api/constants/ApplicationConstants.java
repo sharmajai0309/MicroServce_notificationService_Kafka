@@ -13,4 +13,7 @@ public interface ApplicationConstants {
     String REDIS_LOOKUP_BY_NAME = "BY_NAME:";
     String REDIS_LOOKUP_BY_ID = "BY_ID:";
 
+    String TEMPLATE_NOT_FOUND_BY_ID = "NOT_FOUND_BY_ID:";
+    String TEMPLATE_DELETED = "TEMPLATED_DELETED:";
+
 }
