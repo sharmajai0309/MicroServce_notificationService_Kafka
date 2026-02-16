@@ -13,4 +13,13 @@ public class ApplicationProperties {
 
     @Value("${kafka.ingest.topic}")
     private String ingestTopic;
+
+    @Value("${mongodb.connection.uri}")
+    private String mongoConnection;
+
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String kafkaServer;
+
+
+
 }

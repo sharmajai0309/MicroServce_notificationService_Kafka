@@ -36,7 +36,6 @@ import static com.notification.api.utils.CommanUtils.getCurrentTenantId;
 class TemplateDaoImpl implements TemplateDao {
 
      private final TemplateRepository templateRepository;
-
      private final MongoTemplate  mongoTemplate;
      private final CacheService cacheService;
 

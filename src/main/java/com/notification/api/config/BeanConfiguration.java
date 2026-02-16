@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 
 
-
+/**
+ * The type Bean configuration.
+ */
 @Configuration
 public class BeanConfiguration {
 
