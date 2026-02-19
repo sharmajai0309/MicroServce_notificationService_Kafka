@@ -1,6 +1,5 @@
 package com.notification.api.services.impl;
 
-import com.notification.api.PubSub.fallBack.GenericFallBackPublisher;
 import com.notification.api.PubSub.publisher.GenericPublisher;
 import com.notification.api.dao.interfaces.TemplateDao;
 import com.notification.api.exception.ValidationException;
@@ -13,12 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.Map;
 
-import javax.management.Notification;
-import java.util.Optional;
 
-import static com.notification.api.constants.ErrorConstants.Template_Not_Exists_with_Id_Error;
+import static com.notification.api.constants.ErrorConstants.*;
 
 @Service
 @Slf4j
@@ -35,28 +32,69 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void sendNotification(final SendNotificationRequest request) {
 
-        Optional<Template> byTenantIdAndId = templateDao.findByTenantIdAndId(CommanUtils.getCurrentTenantId(), request.getTemplateId());
+        Template templateFromDatabase = templateDao.findByTenantIdAndId(CommanUtils.getCurrentTenantId(), request.getTemplateId())
+                .orElseThrow(() -> {
+                    log.error("Template not found. tenantId={}, templateId={}, traceId={}",
+                            CommanUtils.getCurrentTenantId(), request.getTemplateId(), CommanUtils.getCurrentTraceID());
 
-        if(byTenantIdAndId.isEmpty()){
-            log.error("Template not found Sending to Audit Topic");
+                    // Publish to Audit Topic
+//                     genericPublisher.sendDataToAudit();
+                    return new ValidationException(Template_Not_Exists_with_Id_Error,
+                            HttpStatus.BAD_REQUEST.value());
+                });
 
-            // Validation Failed.... Publish Data to Audit_Topic
-//            genericPublisher.sendDataToAudit();
 
-            throw new ValidationException(Template_Not_Exists_with_Id_Error, HttpStatus.BAD_REQUEST.value());
-        }
+        //Validate Dynamic Variables
+        validateDynamicVariables(templateFromDatabase,request.getDynamicVariables());
+
+
+//        Complete Notification Microservice Flow Design
+
 
         //Validation Success.... Publish Data to Ingest_Topic
         IngestTopicDTO ingestTopicDTO = new IngestTopicDTO();
-        ingestTopicDTO.setRequestId(CommanUtils.getCurrentTranceID());
-        ingestTopicDTO.setTemplateId(CommanUtils.getCurrentTenantId());
+        ingestTopicDTO.setRequestId(CommanUtils.getCurrentTraceID());
+        ingestTopicDTO.setTemplateId(request.getTemplateId());
         ingestTopicDTO.setReceivedAt(CommanUtils.getCurrentTimeStamp());
-        ingestTopicDTO.setTenantId(request.getTemplateId());
+        ingestTopicDTO.setTenantId(CommanUtils.getCurrentTenantId());
         ingestTopicDTO.setNotificationType(request.getNotificationType());
         ingestTopicDTO.setDynamicVariables(request.getDynamicVariables());
 
         genericPublisher.sendDataToIngest(ingestTopicDTO);
-
+        log.info("Notification sent to ingest topic successfully. traceId={}", CommanUtils.getCurrentTraceID());
 
     }
+
+    //Helper Method
+    private void validateDynamicVariables(Template template,
+                                          Map<String, Object> dynamicVariables) {
+
+        Map<String, String> templateVariables = template.getTemplateVariables();
+
+        // Case 1: Template does NOT require variables
+        if (templateVariables == null || templateVariables.isEmpty()) {
+            if (dynamicVariables != null && !dynamicVariables.isEmpty()) {
+                throw new ValidationException(DYNAMIC_VARIABLE_NOT_REQUIRED,
+                        HttpStatus.BAD_REQUEST.value());
+            }
+            return;
+        }
+
+        // Case 2: Template requires variables but request missing
+        if (dynamicVariables == null || dynamicVariables.isEmpty()) {
+            throw new ValidationException(DYNAMIC_VARIABLE_IS_REQUIRED,
+                    HttpStatus.BAD_REQUEST.value());
+        }
+
+        // Case 3: Size mismatch or missing keys
+        if (templateVariables.size() != dynamicVariables.size()
+                || templateVariables.values().stream()
+                .anyMatch(variable -> !dynamicVariables.containsKey(variable))) {
+
+            throw new ValidationException(DYNAMIC_VARIABLES_INVALID,
+                    HttpStatus.BAD_REQUEST.value());
+        }
+    }
+
+
 }

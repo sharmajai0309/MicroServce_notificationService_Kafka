@@ -33,19 +33,24 @@ public class NotificationAuthFilter extends OncePerRequestFilter {
             if (CommanUtils.isEmpty(xTenantId)) {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.getWriter().write("Unauthorized API Key !!!! Key is Required");
-                String requestid = String.valueOf(CommanUtils.generateUUID());
-                MDC.put(X_REQUEST_ID, requestid);
-                response.setHeader(X_REQUEST_ID, requestid);
-
+                return;
             }
+            String requestid = String.valueOf(CommanUtils.generateUUID());
+            MDC.put(X_REQUEST_ID, requestid);
+            response.setHeader(X_REQUEST_ID, requestid);
             NotificationContextHolder.setContext(new NotificationContext(xTenantId));
         }
-        filterChain.doFilter(request, response);
 
-        if(isValidAPI(request.getRequestURI())){
-            NotificationContextHolder.clear();
+        try{
+            filterChain.doFilter(request, response);
+        } finally{
+            if(isValidAPI(request.getRequestURI())){
+                NotificationContextHolder.clear();
+            }
         }
+
     }
+
     static boolean isValidAPI(final String apiPath) {
         return apiPath.startsWith("/api");
     }

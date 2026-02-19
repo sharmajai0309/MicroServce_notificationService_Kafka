@@ -1,7 +1,7 @@
 package com.notification.api.models.context;
 
 public final class NotificationContextHolder {
-//    This Only Work in Synchronized Environment
+//    This Only Work in Synchronized Environment/App
     private static final ThreadLocal<NotificationContext> NOTIFICATION_CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
 
     public static void setContext(NotificationContext context) {

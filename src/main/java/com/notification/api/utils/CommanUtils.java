@@ -73,7 +73,7 @@ public final class CommanUtils {
      * @return {@link String}
      * @see String
      */
-    public static String getCurrentTranceID(){
+    public static String getCurrentTraceID(){
         return MDC.get(X_REQUEST_ID);
     }
 
